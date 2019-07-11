@@ -8,21 +8,28 @@ router.get('/register', (req, res) => {
 })
 
 router.post('/register', (req, res) => {
-    const { name, lastname, email, password, confirmPassword } = req.body;
-
-    if (!name || !lastname || !email  || !password || !confirmPassword) {
+    const {
+        name,
+        lastname,
+        email,
+        password,
+        confirmPassword
+    } = req.body;
+    console.log("hit register");
+    if (!name || !lastname || !email || !password || !confirmPassword) {
         console.log("Error: Enter all fields");
     }
 
-    if( password !== confirmPassword ) {
+    if (password !== confirmPassword) {
         console.log("Error: Passwords do not match")
     }
 
-    User.findOne ({ email: email }).then(user => {
-        if(user) {
+    User.findOne({
+        email: email
+    }).then(user => {
+        if (user) {
             console.log("User already registered");
-        }
-        else {
+        } else {
             const newUser = new User({
                 name,
                 lastname,
@@ -32,15 +39,16 @@ router.post('/register', (req, res) => {
 
             bcrypt.genSalt(5, (err, salt) => {
                 bcrypt.hash(newUser.password, salt, (err, hash) => {
-                    if(err) {
+                    if (err) {
                         console.log(`Bcrypt error: ${err}`);
-                    }
-                    else {
+                    } else {
                         newUser.password = hash;
                         newUser.save()
                             .then(user => {
                                 console.log(`Successfully registered ${user}`);
-                                res.status(200).json({ redirect: true})
+                                res.status(200).json({
+                                    redirect: true
+                                })
                             })
                             .catch(err => console.log(err));
                     }
@@ -48,31 +56,45 @@ router.post('/register', (req, res) => {
             });
         }
     })
-/*   if(redirect) {
-        res.json(200, { redirect: true })
-    }*/
+    /*   if(redirect) {
+            res.json(200, { redirect: true })
+        }*/
 });
 
 router.post('/login', (req, res) => {
-    const { email, password} = req.body;
-    User.findOne({ email}, function(err, user) {
-        if(err) {
+    console.log("hit login");
+    const {
+        email,
+        password
+    } = req.body;
+    User.findOne({
+        email
+    }, function (err, user) {
+        if (err) {
             console.log(err);
-            res.status(500).json({ error: 'Internal error' })
-        }
-        else if (!user) {
-            res.status(401).json({ error: 'Incorrect email or password' })
-        }
-        else {
+            res.status(500).json({
+                error: 'Internal error'
+            })
+        } else if (!user) {
+            res.status(401).json({
+                error: 'Incorrect email or password'
+            })
+        } else {
             bcrypt.compare(password, user.password, (err, isMatch) => {
                 if (err) {
                     console.log(err);
-                    res.status(500).json({ error: 'Internal error' })
+                    res.status(500).json({
+                        error: 'Internal error'
+                    })
                 }
                 if (!isMatch) {
-                    res.status(401).json({ error: 'Incorrect email or password' }) 
+                    res.status(401).json({
+                        error: 'Incorrect email or password'
+                    })
                 } else {
-                    res.status(200).json({ redirect: true })
+                    res.status(200).json({
+                        redirect: true
+                    })
                 }
             });
         }
